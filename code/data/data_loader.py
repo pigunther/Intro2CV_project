@@ -1,16 +1,13 @@
 from torchvision import transforms
 import pandas as pd
-from pathlib import Path
 import torch
-from keypoint_dataset import Normalize, ToTensor, KeypointsDataset, prepare_train_valid_loaders
-from  mlp import MLP, CNN
-from train import train
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage import io, measure
 from torch import optim
+from dataset import Normalize, ToTensor, ImagesDataset, prepare_train_valid_loaders
 
-path = '../../dataset/state-farm-distracted-driver-detection/'
+path = '../dataset/state-farm-distracted-driver-detection/'
 
 IMG_SIZE = 64
 
@@ -26,36 +23,18 @@ valid_size = 0.2
 tsfm = transforms.Compose([Normalize(), ToTensor()])
 
 # Load the training data and test data
-trainset = KeypointsDataset(train_df, transform=tsfm)
-testset = KeypointsDataset(test_df, train=False, transform=tsfm)
+trainset = ImagesDataset(driver_imgs_list, transform=tsfm)
 
 # prepare data loaders
 train_loader, valid_loader = prepare_train_valid_loaders(trainset,
                                                          valid_size,
                                                          batch_size)
 
-test_loader = torch.utils.data.DataLoader(testset, batch_size=batch_size)
+print(train_loader)
 
-device =torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-# model = MLP(input_size=IMG_SIZE*IMG_SIZE*3, output_size=48,
-#             hidden_layers=[128, 64], drop_p=0.1)
-# model = model.to(device)
-# model = model.double()
-
-# criterion = torch.nn.MSELoss()
-# optimizer = optim.Adam(model.parameters(), lr=0.003)
-
-# train_losses, valid_losses = train(train_loader, valid_loader,
-#                                    model,criterion, optimizer, device,
-#                                    n_epochs=50,
-#                                    saved_model='model.pt')
-
-model = CNN(outputs=48)
-model = model.to(device)
-model = model.double()
-criterion = torch.nn.MSELoss()
-optimizer = optim.Adam(model.parameters(), lr=0.003)
-train(train_loader, valid_loader, model, criterion, optimizer, device, n_epochs=50, saved_model='cnn2.pt')
-
-# print(train_losses, valid_losses)
-torch.save(model.state_dict(), '../model_saved')
+for batch in train_loader:
+    print(batch)
+    plt.imshow(batch['image'][0].permute(2, 1, 0))
+    plt.title(batch['answer'][0])
+    plt.show()
+    break
