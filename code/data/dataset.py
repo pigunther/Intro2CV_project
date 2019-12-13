@@ -36,6 +36,32 @@ class ImagesDataset:
         return sample
 
 
+class KeypointsDataset:
+    def __init__(self, list_csv, train=True, transform=None):
+        '''
+        Args:
+            path (string): path to images folder
+            answers (DataFrame): data of keypoints in pandas dataframe format.
+            train (Boolean) : True for train data with keypoints, default is True
+            transform (callable, optional): Optional transform to be applied on
+            sample
+        '''
+        self.list_csv = list_csv
+        self.train = train
+
+    def __len__(self):
+        return len(self.list_csv)
+
+    def __getitem__(self, ind):
+        cl = self.list_csv['classname'][ind]
+        kp = self.list_csv['keypoints'][ind]
+        # print(cl, name, self.list_csv.iloc[cl])
+        mode = 'train' if self.train else 'val'
+
+        sample = {'keypoints': kp, 'answer': cl}
+        return sample
+
+
 class Normalize(object):
     '''Normalize input images'''
 
@@ -56,6 +82,7 @@ class ToTensor(object):
         image = image.T
         image = torch.from_numpy(image)
         return {'image': image, 'answer': answer}
+
 
 def prepare_train_valid_loaders(trainset, valid_size=0.2,
                                 batch_size=128):
