@@ -12,6 +12,7 @@ sys.path.insert(1, './pose_estimation')
 # print(sys.path)
 from keypoint_resnet import MLP
 from train import train
+from cnn import CNN_simple
 
 path = '../dataset/state-farm-distracted-driver-detection/'
 
